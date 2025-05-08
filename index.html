@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa do Brasil</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
+    }
+    #brazil-map {
+      max-width: 600px;
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+    }
+    .state {
+      fill: #eee;
+      stroke: #999;
+      stroke-width: 0.5;
+      cursor: pointer;
+      outline: none;
+      transition: fill 0.2s;
+    }
+    .state:hover,
+    .state:focus {
+      fill: #cce5ff;
+    }
+    /* Modal */
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    #modal[aria-hidden="false"] {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      max-width: 400px;
+      width: 90%;
+      border-radius: 4px;
+      position: relative;
+    }
+    #close-button {
+      position: absolute;
+      top: 0.5rem; right: 0.5rem;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mapa do Brasil</h1>
+  <div id="map-container" aria-label="Carregando mapa..."></div>
+
+  <!-- Modal -->
+  <div id="modal"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="modal-title"
+       aria-hidden="true">
+    <div class="modal-content">
+      <button id="close-button" aria-label="Fechar modal">×</button>
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    // Dados de exemplo para cada estado (substitua pelos seus)
+    const stateInfo = {
+      AC: 'Acre: Informações sobre o Acre...',
+      AL: 'Alagoas: Informações sobre Alagoas...',
+      AP: 'Amapá: Informações sobre o Amapá...',
+      AM: 'Amazonas: Informações sobre o Amazonas...',
+      BA: 'Bahia: Informações sobre a Bahia...',
+      CE: 'Ceará: Informações sobre o Ceará...',
+      DF: 'Distrito Federal: Informações sobre o DF...',
+      ES: 'Espírito Santo: Informações sobre o Espírito Santo...',
+      GO: 'Goiás: Informações sobre Goiás...',
+      MA: 'Maranhão: Informações sobre o Maranhão...',
+      MT: 'Mato Grosso: Informações sobre o Mato Grosso...',
+      MS: 'Mato Grosso do Sul: Informações sobre o MS...',
+      MG: 'Minas Gerais: Informações sobre Minas Gerais...',
+      PA: 'Pará: Informações sobre o Pará...',
+      PB: 'Paraíba: Informações sobre a Paraíba...',
+      PR: 'Paraná: Informações sobre o Paraná...',
+      PE: 'Pernambuco: Informações sobre Pernambuco...',
+      PI: 'Piauí: Informações sobre o Piauí...',
+      RJ: 'Rio de Janeiro: Informações sobre o Rio...',
+      RN: 'Rio Grande do Norte: Informações sobre o RN...',
+      RS: 'Rio Grande do Sul: Informações sobre o RS...',
+      RO: 'Rondônia: Informações sobre Rondônia...',
+      RR: 'Roraima: Informações sobre Roraima...',
+      SC: 'Santa Catarina: Informações sobre SC...',
+      SP: 'São Paulo: Informações sobre SP...',
+      SE: 'Sergipe: Informações sobre Sergipe...',
+      TO: 'Tocantins: Informações sobre Tocantins...'
+    };
+
+    // Funções para abrir e fechar a modal
+    const modal = document.getElementById('modal');
+    const titleEl = document.getElementById('modal-title');
+    const bodyEl = document.getElementById('modal-body');
+    const closeBtn = document.getElementById('close-button');
+    let lastFocusedItem = null;
+
+    function openModal(stateId) {
+      const name = document.getElementById(stateId).dataset.name;
+      titleEl.textContent = name;
+      bodyEl.textContent = stateInfo[stateId] || 'Conteúdo não disponível.';
+      modal.setAttribute('aria-hidden', 'false');
+      lastFocusedItem = document.activeElement;
+      closeBtn.focus();
+      document.addEventListener('keydown', trapEscape);
+    }
+
+    function closeModal() {
+      modal.setAttribute('aria-hidden', 'true');
+      document.removeEventListener('keydown', trapEscape);
+      if (lastFocusedItem) lastFocusedItem.focus();
+    }
+
+    function trapEscape(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    }
+
+    // Carrega o SVG do arquivo Mapa.txt
+    fetch('https://seusite.com/assets/Mapa.txt') // <---  SUBSTITUA ESTA URL!
+      .then(response => response.text())
+      .then(svgText => {
+        const container = document.getElementById('map-container');
+        container.innerHTML = svgText;
+
+        // Adiciona listeners aos estados após carregar o SVG
+        container.querySelectorAll('.state').forEach(path => {
+          path.setAttribute('tabindex', '0');
+          path.setAttribute('role', 'button');
+          path.addEventListener('click', () => openModal(path.id));
+          path.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openModal(path.id);
+            }
+          });
+        });
+      })
+      .catch(error => console.error('Erro ao carregar o SVG:', error));
+
+    // Event listeners para fechar a modal
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal();
+    });
+  </script>
+</body>
+</html>
