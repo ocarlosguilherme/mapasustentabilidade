@@ -139,7 +139,7 @@
       }
     });
 
-    fetch('https://github.com/ocarlosguilherme/mapasustentabilidade/blob/main/Mapa.txt')
+    fetch('https://ocarlosguilherme.github.io/mapasustentabilidade/Mapa.txt')
       .then(response => response.text())
       .then(svgData => {
         mapContainer.innerHTML = svgData;
